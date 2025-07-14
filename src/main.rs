@@ -47,25 +47,45 @@ fn main() -> Result<()> {
 
     let ignore_set = Arc::new(build_ignore_set(&args.directory)?);
     let base_dir = std::fs::canonicalize(&args.directory)?;
+    
+    if args.verbose {
+        println!("Base directory: {}", base_dir.display());
+        println!("Starting directory walk from: {}", args.directory);
+    }
 
     let mut total_files = 0;
     let mut modified_files = 0;
 
     let walker = WalkDir::new(&args.directory)
         .into_iter()
-        .filter_entry(|e| args.include_hidden || !is_hidden(e))
+        .filter_entry(|e| {
+            let path = e.path();
+            
+            // Always accept the root directory we're starting from
+            if path == Path::new(&args.directory) {
+                return true;
+            }
+            
+            // Filter out hidden entries unless include_hidden is set
+            if !args.include_hidden && is_hidden(e) {
+                return false;
+            }
+            
+            // Filter out ignored paths (both files and directories)
+            if should_ignore_fast(path, &base_dir, &ignore_set) {
+                if args.verbose {
+                    println!("Ignoring: {}", path.display());
+                }
+                return false;
+            }
+            
+            true
+        })
         .filter_map(|e| e.ok())
         .filter(|e| e.file_type().is_file());
 
     for entry in walker {
         let path = entry.path();
-
-        if should_ignore_fast(path, &base_dir, &ignore_set) {
-            if args.verbose {
-                println!("Ignoring: {}", path.display());
-            }
-            continue;
-        }
 
         if let Some(ref exts) = extensions {
             let has_valid_extension = path.extension()
@@ -92,8 +112,8 @@ fn main() -> Result<()> {
     }
 
     println!("\nSummary:");
-    println!("Total files processed: {}", total_files);
-    println!("Files modified: {}", modified_files);
+    println!("Total files processed: {total_files}");
+    println!("Files modified: {modified_files}");
     if args.dry_run {
         println!("(Dry run - no files were actually modified)");
     }
