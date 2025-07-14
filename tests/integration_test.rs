@@ -11,6 +11,7 @@ fn test_basic_replacement() {
     let output = Command::new("cargo")
         .args(&["run", "--", "-p", r"\d+", "-r", "XXX", "-d"])
         .arg(temp_dir.path())
+        .arg("--include-hidden")
         .output()
         .expect("Failed to execute command");
 
@@ -30,6 +31,7 @@ fn test_dry_run() {
         .args(&["run", "--", "-p", r"\d+", "-r", "XXX", "-d"])
         .arg(temp_dir.path())
         .arg("--dry-run")
+        .arg("--include-hidden")
         .output()
         .expect("Failed to execute command");
 
@@ -50,6 +52,7 @@ fn test_file_extension_filter() {
         .args(&["run", "--", "-p", r"\d+", "-r", "XXX", "-d"])
         .arg(temp_dir.path())
         .args(&["-e", "txt,rs"])
+        .arg("--include-hidden")
         .output()
         .expect("Failed to execute command");
 
@@ -72,6 +75,7 @@ fn test_recursive_directory_traversal() {
     let output = Command::new("cargo")
         .args(&["run", "--", "-p", r"\d+", "-r", "NUM", "-d"])
         .arg(temp_dir.path())
+        .arg("--include-hidden")
         .output()
         .expect("Failed to execute command");
 
@@ -91,6 +95,7 @@ fn test_verbose_output() {
         .args(&["run", "--", "-p", r"\d+", "-r", "XXX", "-d"])
         .arg(temp_dir.path())
         .arg("--verbose")
+        .arg("--include-hidden")
         .output()
         .expect("Failed to execute command");
 
@@ -120,6 +125,7 @@ fn test_no_matches() {
     let output = Command::new("cargo")
         .args(&["run", "--", "-p", r"\d+", "-r", "XXX", "-d"])
         .arg(temp_dir.path())
+        .arg("--include-hidden")
         .output()
         .expect("Failed to execute command");
 
@@ -142,6 +148,7 @@ fn test_multiple_files() {
     let output = Command::new("cargo")
         .args(&["run", "--", "-p", r"\d+", "-r", "XXX", "-d"])
         .arg(temp_dir.path())
+        .arg("--include-hidden")
         .output()
         .expect("Failed to execute command");
 
