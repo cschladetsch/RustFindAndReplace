@@ -1,4 +1,4 @@
-# Rust Regex-Replace
+# RustReplace
 
 A fast and efficient command-line tool for performing regex-based search and replace operations across multiple files recursively.
 
@@ -7,6 +7,7 @@ A fast and efficient command-line tool for performing regex-based search and rep
 - **Recursive file processing** - Search through directories and subdirectories
 - **Regex pattern matching** - Full regex support for complex pattern matching
 - **File extension filtering** - Process only specific file types
+- **Ignore patterns** - Skip files/directories using `.rr_ignore` files (gitignore syntax)
 - **Dry run mode** - Preview changes without modifying files
 - **Verbose output** - See detailed information about matches and replacements
 - **Fast performance** - Built with Rust for speed and efficiency
@@ -82,6 +83,55 @@ Replace function declarations using capture groups:
 regex-replace -p 'fn (\w+)\(' -r 'function $1(' -e 'rs'
 ```
 
+## Ignore Patterns
+
+The tool supports `.rr_ignore` files to exclude files and directories from processing. These files use gitignore-style syntax.
+
+### Ignore File Locations
+
+1. **Project-specific**: `.rr_ignore` in the current working directory
+2. **Target directory**: `.rr_ignore` in the directory being searched (if different from cwd)
+3. **User-global**: `~/.rr_ignore` in your home directory
+
+All ignore files are combined, with patterns from all files being applied.
+
+### Ignore Pattern Syntax
+
+- `*.log` - Ignore all .log files
+- `target/**` - Ignore all files in the target directory
+- `node_modules/**` - Ignore all files in node_modules
+- `.git/**` - Ignore all files in .git directory
+- `*.{tmp,temp,swp}` - Ignore files with these extensions
+- `#` - Lines starting with # are comments
+- Empty lines are ignored
+
+### Example .rr_ignore file
+
+```
+# Build artifacts
+target/**
+*.o
+*.so
+
+# Version control
+.git/**
+.svn/**
+
+# Dependencies
+node_modules/**
+vendor/**
+
+# IDE files
+.vscode/**
+.idea/**
+*.iml
+
+# Temporary files
+*.tmp
+*.swp
+*~
+```
+
 ## Regular Expression Syntax
 
 This tool uses Rust's regex crate, which supports:
@@ -150,3 +200,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Command-line parsing by [clap](https://crates.io/crates/clap)
 - Directory traversal with [walkdir](https://crates.io/crates/walkdir)
 - Error handling via [anyhow](https://crates.io/crates/anyhow)
+- Pattern matching with [globset](https://crates.io/crates/globset)
