@@ -1,4 +1,4 @@
-# regex-replace
+# Rust Regex-Replace
 
 A fast and efficient command-line tool for performing regex-based search and replace operations across multiple files recursively.
 
