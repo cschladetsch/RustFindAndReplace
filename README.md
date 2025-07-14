@@ -1,8 +1,49 @@
-# RustReplace
+# RustFindAndReplace
 
-A fast and efficient command-line tool for performing regex-based search and replace operations across multiple files recursively.
+[![Rust](https://img.shields.io/badge/rust-%23000000.svg?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/yourusername/RustFindAndReplace/ci.yml?branch=master&style=for-the-badge)](https://github.com/yourusername/RustFindAndReplace/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Crates.io](https://img.shields.io/crates/v/regex-replace.svg?style=for-the-badge)](https://crates.io/crates/regex-replace)
+[![Downloads](https://img.shields.io/crates/d/regex-replace.svg?style=for-the-badge)](https://crates.io/crates/regex-replace)
+[![Rust Version](https://img.shields.io/badge/rust-1.70%2B-blue.svg?style=for-the-badge)](https://www.rust-lang.org/)
+[![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey?style=for-the-badge)](https://github.com/yourusername/RustFindAndReplace)
 
-## Features
+[![codecov](https://img.shields.io/codecov/c/github/yourusername/RustFindAndReplace?style=for-the-badge)](https://codecov.io/gh/yourusername/RustFindAndReplace)
+[![Documentation](https://img.shields.io/docsrs/regex-replace?style=for-the-badge)](https://docs.rs/regex-replace)
+[![Dependencies](https://img.shields.io/librariesio/github/yourusername/RustFindAndReplace?style=for-the-badge)](https://libraries.io/github/yourusername/RustFindAndReplace)
+[![GitHub Issues](https://img.shields.io/github/issues/yourusername/RustFindAndReplace.svg?style=for-the-badge)](https://github.com/yourusername/RustFindAndReplace/issues)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](https://github.com/yourusername/RustFindAndReplace/pulls)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=for-the-badge)](https://github.com/yourusername/RustFindAndReplace/graphs/commit-activity)
+
+A blazing-fast command-line tool for performing regex-based search and replace operations across multiple files recursively, built with Rust for maximum performance and safety.
+
+## 📋 Table of Contents
+
+- [Quick Start](#-quick-start)
+- [Features](#-features)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Ignore Patterns](#-ignore-patterns)
+- [Regular Expression Syntax](#-regular-expression-syntax)
+- [Testing](#-testing)
+- [Safety Features](#️-safety-features)
+- [Performance](#-performance)
+- [Contributing](#-contributing)
+
+## 🚀 Quick Start
+
+```bash
+# Install from crates.io
+cargo install regex-replace
+
+# Basic usage
+regex-replace -p 'old_text' -r 'new_text'
+
+# Preview changes without modifying files
+regex-replace -p 'pattern' -r 'replacement' --dry-run
+```
+
+## ✨ Features
 
 - **Recursive file processing** - Search through directories and subdirectories
 - **Regex pattern matching** - Full regex support for complex pattern matching
@@ -12,15 +53,16 @@ A fast and efficient command-line tool for performing regex-based search and rep
 - **Verbose output** - See detailed information about matches and replacements
 - **Fast performance** - Built with Rust for speed and efficiency
 - **Safe operation** - Graceful error handling for unreadable files
+- **Hidden files support** - Option to include hidden files and directories
 
-## Installation
+## 📦 Installation
 
 ### From Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/regex-replace.git
-cd regex-replace
+git clone https://github.com/yourusername/RustFindAndReplace.git
+cd RustFindAndReplace
 
 # Build the project
 cargo build --release
@@ -34,7 +76,7 @@ cargo build --release
 cargo install --path .
 ```
 
-## Usage
+## 🔧 Usage
 
 ```bash
 regex-replace [OPTIONS]
@@ -48,6 +90,7 @@ regex-replace [OPTIONS]
 - `-e, --extensions <EXTENSIONS>` - File extensions to include (comma-separated, e.g., "txt,rs,js")
 - `-n, --dry-run` - Show what would be changed without modifying files
 - `-v, --verbose` - Display detailed output including match information
+- `--include-hidden` - Include hidden files and directories in search
 - `-h, --help` - Print help information
 - `-V, --version` - Print version information
 
@@ -83,7 +126,13 @@ Replace function declarations using capture groups:
 regex-replace -p 'fn (\w+)\(' -r 'function $1(' -e 'rs'
 ```
 
-## Ignore Patterns
+#### Include hidden files
+Search and replace in all files including hidden ones:
+```bash
+regex-replace -p 'DEBUG' -r 'RELEASE' --include-hidden
+```
+
+## 🚫 Ignore Patterns
 
 The tool supports `.rr_ignore` files to exclude files and directories from processing. These files use gitignore-style syntax.
 
@@ -132,7 +181,7 @@ vendor/**
 *~
 ```
 
-## Regular Expression Syntax
+## 🔍 Regular Expression Syntax
 
 This tool uses Rust's regex crate, which supports:
 - Character classes: `[a-z]`, `\d`, `\w`, `\s`
@@ -143,7 +192,7 @@ This tool uses Rust's regex crate, which supports:
 
 For full regex syntax documentation, see: https://docs.rs/regex/latest/regex/#syntax
 
-## Testing
+## 🧪 Testing
 
 The project includes comprehensive unit and integration tests:
 
@@ -161,22 +210,23 @@ cargo test --lib
 cargo test --test integration_test
 ```
 
-## Safety Features
+## 🛡️ Safety Features
 
 - **Non-destructive by default**: Use `--dry-run` to preview changes
 - **File validation**: Skips binary files and handles encoding errors gracefully
 - **Atomic writes**: Files are written completely or not at all
 - **Clear error messages**: Detailed error reporting for debugging
 
-## Performance
+## ⚡ Performance
 
-The tool is optimized for performance:
-- Parallel directory traversal
-- Efficient regex compilation (compiled once, used many times)
-- Memory-efficient file processing
-- Zero-copy replacements where possible
+RustFindAndReplace is optimized for maximum performance:
+- Efficient directory traversal with WalkDir
+- Regex compilation once per run (not per file)
+- Memory-efficient streaming file processing
+- Minimal allocations during replacement operations
+- Skip binary files automatically for faster processing
 
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -189,11 +239,15 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 5. Push to the branch (`git push origin feature/amazing-feature`)
 6. Open a Pull Request
 
-## License
+## 🏗️ Build Status
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Built with Rust 2021 edition for stability and modern language features.
 
-## Acknowledgments
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
 
 - Built with [Rust](https://www.rust-lang.org/)
 - Uses [regex](https://crates.io/crates/regex) for pattern matching
@@ -201,3 +255,25 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Directory traversal with [walkdir](https://crates.io/crates/walkdir)
 - Error handling via [anyhow](https://crates.io/crates/anyhow)
 - Pattern matching with [globset](https://crates.io/crates/globset)
+
+---
+
+<div align="center">
+
+## 📊 Project Stats
+
+[![GitHub Stars](https://img.shields.io/github/stars/yourusername/RustFindAndReplace?style=social)](https://github.com/yourusername/RustFindAndReplace/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/yourusername/RustFindAndReplace?style=social)](https://github.com/yourusername/RustFindAndReplace/network/members)
+[![GitHub Watchers](https://img.shields.io/github/watchers/yourusername/RustFindAndReplace?style=social)](https://github.com/yourusername/RustFindAndReplace/watchers)
+
+[![Lines of Code](https://img.shields.io/tokei/lines/github/yourusername/RustFindAndReplace?style=flat-square)](https://github.com/yourusername/RustFindAndReplace)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/yourusername/RustFindAndReplace?style=flat-square)](https://github.com/yourusername/RustFindAndReplace/commits/master)
+[![GitHub Contributors](https://img.shields.io/github/contributors/yourusername/RustFindAndReplace?style=flat-square)](https://github.com/yourusername/RustFindAndReplace/graphs/contributors)
+
+</div>
+
+---
+
+<div align="center">
+  Made with ❤️ in Rust
+</div>
