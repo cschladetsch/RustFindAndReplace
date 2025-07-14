@@ -1,0 +1,4 @@
+[WORD] is a [WORD] [WORD] [WORD] [WORD] numbers: 123, 456, 789.
+Let's replace all numbers [WORD] [WORD].
+The [WORD] [WORD] should [WORD] be replaced.
+Phone numbers [WORD] 555-[WORD] [WORD] be affected too.
