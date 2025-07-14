@@ -4,7 +4,8 @@ use globset::{Glob, GlobSet, GlobSetBuilder};
 use regex::Regex;
 use std::fs;
 use std::path::{Path, PathBuf};
-use walkdir::WalkDir;
+use std::sync::Arc;
+use walkdir::{DirEntry, WalkDir};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -26,6 +27,9 @@ struct Args {
 
     #[arg(short, long, help = "Verbose output")]
     verbose: bool,
+
+    #[arg(long, help = "Include hidden files and directories")]
+    include_hidden: bool,
 }
 
 fn main() -> Result<()> {
@@ -38,22 +42,22 @@ fn main() -> Result<()> {
         ext.split(',').collect()
     });
 
-    let ignore_set = build_ignore_set(&args.directory)?;
+    let ignore_set = Arc::new(build_ignore_set(&args.directory)?);
+    let base_dir = std::fs::canonicalize(&args.directory)?;
 
     let mut total_files = 0;
     let mut modified_files = 0;
 
-    for entry in WalkDir::new(&args.directory)
+    let walker = WalkDir::new(&args.directory)
         .into_iter()
+        .filter_entry(|e| args.include_hidden || !is_hidden(e))
         .filter_map(|e| e.ok())
-    {
-        let path = entry.path();
-        
-        if !path.is_file() {
-            continue;
-        }
+        .filter(|e| e.file_type().is_file());
 
-        if should_ignore(path, &args.directory, &ignore_set) {
+    for entry in walker {
+        let path = entry.path();
+
+        if should_ignore_fast(path, &base_dir, &ignore_set) {
             if args.verbose {
                 println!("Ignoring: {}", path.display());
             }
@@ -124,8 +128,11 @@ fn process_file(path: &Path, regex: &Regex, replacement: &str, dry_run: bool, ve
     }
 
     if !dry_run {
-        fs::write(path, new_content.as_ref())
-            .with_context(|| format!("Failed to write file: {}", path.display()))?;
+        // Only write if content actually changed (saves disk I/O)
+        if new_content != content {
+            fs::write(path, new_content.as_ref())
+                .with_context(|| format!("Failed to write file: {}", path.display()))?;
+        }
     }
 
     Ok(true)
@@ -134,6 +141,14 @@ fn process_file(path: &Path, regex: &Regex, replacement: &str, dry_run: bool, ve
 fn build_ignore_set(working_dir: &str) -> Result<GlobSet> {
     let mut builder = GlobSetBuilder::new();
     
+    // Add some common patterns by default for better performance
+    let default_patterns = [".git/**", ".svn/**", "target/**", "node_modules/**"];
+    for pattern in &default_patterns {
+        if let Ok(glob) = Glob::new(pattern) {
+            builder.add(glob);
+        }
+    }
+    
     // Load .rr_ignore from current working directory
     let cwd_ignore = Path::new(".").join(".rr_ignore");
     if cwd_ignore.exists() {
@@ -141,9 +156,11 @@ fn build_ignore_set(working_dir: &str) -> Result<GlobSet> {
     }
     
     // Load .rr_ignore from target directory
-    let local_ignore = Path::new(working_dir).join(".rr_ignore");
-    if local_ignore.exists() {
-        load_ignore_file(&local_ignore, &mut builder)?;
+    if working_dir != "." {
+        let local_ignore = Path::new(working_dir).join(".rr_ignore");
+        if local_ignore.exists() && local_ignore != cwd_ignore {
+            load_ignore_file(&local_ignore, &mut builder)?;
+        }
     }
     
     // Load ~/.rr_ignore from home directory
@@ -179,7 +196,7 @@ fn load_ignore_file(path: &Path, builder: &mut GlobSetBuilder) -> Result<()> {
     Ok(())
 }
 
-fn should_ignore(path: &Path, base_dir: &str, ignore_set: &GlobSet) -> bool {
+fn should_ignore_fast(path: &Path, base_dir: &Path, ignore_set: &Arc<GlobSet>) -> bool {
     // Get relative path from base directory
     let relative_path = match path.strip_prefix(base_dir) {
         Ok(rel) => rel,
@@ -188,6 +205,13 @@ fn should_ignore(path: &Path, base_dir: &str, ignore_set: &GlobSet) -> bool {
     
     // Check if the path matches any ignore pattern
     ignore_set.is_match(relative_path)
+}
+
+fn is_hidden(entry: &DirEntry) -> bool {
+    entry.file_name()
+         .to_str()
+         .map(|s| s.starts_with('.'))
+         .unwrap_or(false)
 }
 
 #[cfg(test)]
