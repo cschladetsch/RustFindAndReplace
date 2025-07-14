@@ -4,13 +4,13 @@ A fast and efficient command-line tool for performing regex-based search and rep
 
 ## Features
 
-- 🔍 **Recursive file processing** - Search through directories and subdirectories
-- 🎯 **Regex pattern matching** - Full regex support for complex pattern matching
-- 📁 **File extension filtering** - Process only specific file types
-- 👀 **Dry run mode** - Preview changes without modifying files
-- 📊 **Verbose output** - See detailed information about matches and replacements
-- ⚡ **Fast performance** - Built with Rust for speed and efficiency
-- 🛡️ **Safe operation** - Graceful error handling for unreadable files
+- **Recursive file processing** - Search through directories and subdirectories
+- **Regex pattern matching** - Full regex support for complex pattern matching
+- **File extension filtering** - Process only specific file types
+- **Dry run mode** - Preview changes without modifying files
+- **Verbose output** - See detailed information about matches and replacements
+- **Fast performance** - Built with Rust for speed and efficiency
+- **Safe operation** - Graceful error handling for unreadable files
 
 ## Installation
 
